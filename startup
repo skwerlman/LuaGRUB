@@ -6,6 +6,7 @@ os.loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
 --os.loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
 --fs = wrappedFS -- Replace the standard fs with wrappedFS
 -- ^^ Not yet functional, but planned
+lgrub.init(shell)
 
 local function grub_countdown()
   for i=1, 10 do
@@ -29,7 +30,7 @@ local function grub_selector()
     print(text)
   end
   table.insert(tChoices, 'Shutdown')
-\ local continue = true
+  local continue = true
   local nSelection = 0 -- The current selection defaults at 0
   while continue do
     term.setCursorPos(1, 1)
@@ -90,6 +91,7 @@ while __continue do
   if lgrub.goAgain then
     __osName = lgrub.newOS
     __continue = true
+    lgrub.done()
   end
 end
 os.shutdown() -- This is always skipped for CraftOS, and usually won't be run ever, unless the OS forgets to power down. This helps prevent hacking/mistakes.

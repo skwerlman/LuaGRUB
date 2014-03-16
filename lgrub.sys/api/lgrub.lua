@@ -1,8 +1,10 @@
-local grubDir = shell.dir()
-osDir = grubDir..'/os'
+local shell
+
+local grubDir
+osDir = nil
 goAgain = false
 newOS = nil
-OSes = nil
+OSes = { { nil, nil } } -- must run listOSes to populate this list
 version = t
 
 enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
@@ -14,6 +16,10 @@ end
 
 function rebootOS() -- Tell the bootloader to boot again, but doesn't change the OS to be run. The OS must return rather than reboot.
   goAgain = true
+end
+
+function done()
+  goAgain = false
 end
 
 function listOSes() -- This is a public function because OSes might allow the installation of new OSes. After a new one is installed, they should run this.
@@ -32,7 +38,7 @@ function listOSes() -- This is a public function because OSes might allow the in
       end
     end
   end
-  return tOut
+  OSes = tOut
 end
 
 function run(osName)
@@ -41,4 +47,13 @@ function run(osName)
   term.clear() -- We clear the screen again, if we aren't already powered off
 end
 
-OSes = listOSes()
+local function setShell( t )
+  shell = t
+  grubDir = shell.dir()
+  osDir = grubDir..'/os'
+end
+
+function init(shellRef)
+  setShell(shellRef)
+  listOSes()
+end
