@@ -6,6 +6,14 @@ function output(n,n2,r,f,auto,u)
   print(auto)
   print(u)
 end
+local t = shell.getRunningProgram()
+if t ~= 'launcher' then
+  fs.move(t,'launcher')
+  printError('Invalid file name. Correcting and rebooting.')
+  sleep(2)
+  os.reboot()
+end
+
 output('?','?','unknown','','unknown','unknown')
 
 -- Thanks to SuicidalSTDz for writing this launcher framework
