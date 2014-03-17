@@ -37,12 +37,13 @@ Drawing.DrawBuffer()
 
 -- event spam
 function grub_evnt()
-  while not __GRUB_TIME_LEFT == 'infinity' do
-    os.queueEvent("GRUBNULLEVENT")
-    sleep(.25)
-  end
   while true do
-    coroutine.yield()
+    if __GRUB_TIME_LEFT == 'infinity' then
+      coroutine.yield()
+    else
+      os.queueEvent("GRUBNULLEVENT")
+      sleep(.25)
+    end
   end
 end
 
@@ -68,7 +69,7 @@ local function grub_selector()
   grub_countdown('sleep')
   while continue do
     Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
-    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray)
     Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
     Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray)
     for nLine = 1, #tOS do
