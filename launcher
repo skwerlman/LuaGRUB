@@ -26,6 +26,9 @@ end
 if not fs.exists( root .. '/lgrub.sys/api' ) then
 	fs.makeDir( root .. '/lgrub.sys/api' )
 end
+if not fs.exists( root .. '/os/CraftOS' ) then
+	fs.makeDir( root .. '/os/CraftOS' )
+end
 
 local function downloadFile( url, sFile )
   local response = http.get( url )
@@ -33,7 +36,7 @@ local function downloadFile( url, sFile )
     local sResponse = response.readAll()
     response.close()
     
-    local handle = io.open( root .. sFile, 'w' )
+    local handle = fs.open( root .. sFile, 'w' )
     handle.write( sResponse )
     handle.close()
     return true
@@ -44,7 +47,10 @@ end
 
 --# Main Update Script
 for i = 1, #tFiles do
-  
+  term.setCursorPos(1,1)
+  term.clear()
+  print(i..'/'..#tFiles)
+  print(tFiles[i])
   --# Grab the file and store it's contents in a string to check against later
   local sResponse
   local response = http.get( repo .. tFiles[ i ] )
@@ -54,10 +60,12 @@ for i = 1, #tFiles do
   end
   
   --# Open the currently installed file to check against the downloaded file
-  local sFile = tFiles[ i ]:sub( 1, 1 ) .. '.' .. tFiles[ i ]:sub( 2, #tFiles[ i ] )
+  local sFile = tFiles[i]
+  print(sFile)
   if not fs.exists( sFile ) then
-    local handle = io.open( sFile, 'w' )
-    handle.write( 'function help() return "This file was improperly downloaded, please try again later!" end' )
+    local handle = fs.open( sFile, 'w' )
+    print(handle or 'nil')
+    handle.write( 'test' )
     handle.close()
   end
   local handle = fs.open( sFile, 'r' )
@@ -67,7 +75,7 @@ for i = 1, #tFiles do
   --# If the file does not exist or doesn't match the downloaded file, then update said file
   if sResponse ~= '' then
     if ( sData ~= sResponse and shouldAutoUpdate ) then
-      local handle = io.open( sFile, 'w' )
+      local handle = fs.open( sFile, 'w' )
       handle.write( sResponse, 'w' )
       handle.close()
       updated = true
@@ -75,6 +83,7 @@ for i = 1, #tFiles do
   end
 end
 
+--[[
 --# Update the launcher, if need be
 local sRunning = shell.getRunningProgram()
 local response = http.get( repo .. 'launcher' )
@@ -89,13 +98,14 @@ if response then
   if sResponse ~= '' then
     if ( sData ~= sResponse and shouldAutoUpdate ) then
       fs.delete( sRunning )
-      local handle = io.open( sRunning, 'w' )
+      local handle = fs.open( sRunning, 'w' )
       handle.write( sResponse )
       handle.close()
       updated = true
     end
   end
 end
+]]--
 
 if updated then
   os.reboot()
