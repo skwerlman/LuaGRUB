@@ -35,17 +35,22 @@ Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.li
 Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
 Drawing.DrawBuffer()
 
+-- event spam
+function grub_evnt()
+  while true do
+    os.queueEvent("GRUBNULLEVENT")
+    sleep(.1)
+  end
+end
+
 -- timer
 local function grub_countdown(e)
   if __GRUB_TIME_LEFT == 'infinity' then return end
-  for i=1, __GRUB_COUNTDOWN_TIME do
-    __GRUB_RUN_TIME = os.clock() - __GRUB_START_TIME
-    if e == 'key' then
-      __GRUB_TIME_LEFT = 'infinity'
-    else
-      __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME - __GRUB_RUN_TIME
-      sleep(1)
-    end
+  __GRUB_RUN_TIME = os.clock() - __GRUB_START_TIME
+  if e == 'key' then
+    __GRUB_TIME_LEFT = 'infinity'
+  else
+  	__GRUB_TIME_LEFT = math.floor(__GRUB_COUNTDOWN_TIME - __GRUB_RUN_TIME)
   end
 end
 
@@ -56,6 +61,8 @@ local function grub_selector()
   local sSeparator = (" "):rep(nTermX) -- Create a separator string with the size of the terminal
   local continue = true
   local nSelection = 1 -- The current selection defaults at 1
+  __GRUB_START_TIME = os.clock()
+  grub_countdown('sleep')
   while continue do
     Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
     Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
@@ -71,8 +78,9 @@ local function grub_selector()
       sLine = sLine..tOS[nLine][1]
       Drawing.WriteStringToBuffer(2, nLine + 1, sLine, fgColor, colors.black)
     end
+    coroutine.yield()
+    local sEvent, nKey = __tempPEStorage()
     Drawing.DrawBuffer()
-    local sEvent, nKey = os.pullEvent()
     if sEvent == 'key' then
       grub_countdown('key')
       if nKey == 200 or nKey == 17 then
@@ -99,17 +107,17 @@ local function grub_selector()
       grub_countdown('sleep')
     end
     if __GRUB_TIME_LEFT == 0 then
-      selected = tOS[nSelection][2]
-      return selected
+      lgrub.prepForRun(tOS[nSelection][2])
+      return
     end
   end
-  selected = tOS[nSelection][2]
-  return selected
+  lgrub.prepForRun(tOS[nSelection][2])
 end
 
 -- exec timer/main loop
-__GRUB_START_TIME = os.clock()
-local __osPath = grub_selector() -- Wait up to fifteen seconds for user input, or use the first OS in the list
+
+parallel.waitForAny(grub_selector, grub_evnt) -- Wait up to fifteen seconds for user input, or use the first OS in the list
+local __osPath = lgrub.getPrepped()
 
 -- exec OS
 local __continue = true

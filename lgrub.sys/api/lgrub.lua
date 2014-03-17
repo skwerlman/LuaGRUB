@@ -1,10 +1,18 @@
-local shell
-
-local grubDir
-local cont = false
 version = '0.1-exp DEV'
-
 enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
+
+local shell
+local grubDir
+local cont = false -- been having weird problems with public variables, had to wrap them in functions
+local tempOS
+
+function prepForRun(path)
+  tempOS = path
+end
+
+function getPrepped()
+  return tempOS
+end
 
 function bootNewOS(osName) -- Will set the next OS to be run. The OS must return rather than reboot.
   newOS = osName
