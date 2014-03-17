@@ -47,13 +47,9 @@ end
 
 --# Main Update Script
 for i = 1, #tFiles do
-  term.setCursorPos(1,1)
-  term.clear()
-  print(i..'/'..#tFiles)
-  print(tFiles[i])
   --# Grab the file and store it's contents in a string to check against later
   local sResponse
-  local response = http.get( repo .. tFiles[ i ] )
+  local response = http.get( repo .. tFiles[i] )
   if response then
     sResponse = response.readAll()
     response.close()
@@ -61,10 +57,8 @@ for i = 1, #tFiles do
   
   --# Open the currently installed file to check against the downloaded file
   local sFile = tFiles[i]
-  print(sFile)
   if not fs.exists( sFile ) then
     local handle = fs.open( sFile, 'w' )
-    print(handle or 'nil')
     handle.write( 'test' )
     handle.close()
   end
@@ -81,6 +75,12 @@ for i = 1, #tFiles do
       updated = true
     end
   end
+  term.setCursorPos(1,1)
+  term.clear()
+  print(i..'/'..#tFiles)
+  print(sFile)
+  print(repo..tFiles[i])
+  print(updated)
 end
 
 --[[
