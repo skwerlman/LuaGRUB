@@ -1,18 +1,10 @@
-version = '0.1-exp DEV'
+version = '1.0.0'
 enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
 
 local shell
 local grubDir
 local cont = false -- been having weird problems with public variables, had to wrap them in functions
 local tempOS
-
-function prepForRun(path)
-  tempOS = path
-end
-
-function getPrepped()
-  return tempOS
-end
 
 function bootNewOS(osName) -- Will set the next OS to be run. The OS must return rather than reboot.
   newOS = osName
@@ -23,18 +15,19 @@ function rebootOS() -- Tell the bootloader to boot again, but doesn't change the
   cont = true
 end
 
-function done()
-  cont = false
-end
-
-function goAgain()
-  return cont
-end
-
 function listOSes() -- This is a public function because OSes might allow the installation of new OSes. After a new one is installed, they should run this.
   local dirs = fs.list(osDir)
   local tOut = {}
   local sData
+function bootNewOS(osName) -- Will set the next OS to be run. The OS must return rather than reboot.
+  newOS = osName
+  cont = true
+end
+
+function rebootOS() -- Tell the bootloader to boot again, but doesn't change the OS to be run. The OS must return rather than reboot.
+  cont = true
+end
+  
   for i, dir in ipairs(dirs) do
     dir = osDir..'/'..dir
     local items = fs.list(dir)
@@ -73,4 +66,31 @@ function init(shellRef)
   if not shell then
     error('Must pass a shell reference at least once')
   end
+end
+
+-- ignore everything below here; using them could break things
+
+function prepForRun(path)
+  tempOS = path
+end
+function bootNewOS(osName) -- Will set the next OS to be run. The OS must return rather than reboot.
+  newOS = osName
+  cont = true
+end
+
+function rebootOS() -- Tell the bootloader to boot again, but doesn't change the OS to be run. The OS must return rather than reboot.
+  cont = true
+end
+
+
+function getPrepped()
+  return tempOS
+end
+
+function done()
+  cont = false
+end
+
+function goAgain()
+  return cont
 end
