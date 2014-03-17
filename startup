@@ -1,10 +1,14 @@
+if fs.exists('/install') then
+  fs.delete('/install')
+end
+
 local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
 local __GRUB_COUNTDOWN_TIME = 15
 local __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME
 local __GRUB_RUN_TIME = nil -- calculated as os.clock - __GRUB_START_TIME
 
 function loadAPI(path) -- Thanks to theoriginalbit for this loadAPI replacer
-  local name = string.match(fs.getName(path), "(%a+)%.?.-")
+  local name = string.match(fs.getName(path), '(%a+)%.?.-')
   local env = setmetatable({shell = shell}, { __index = _G }) -- passes a ref of the shell api to the loaded api
   local func, err = loadfile(path)
   if not func then
@@ -41,7 +45,7 @@ function grub_evnt()
     if __GRUB_TIME_LEFT == 'infinity' then
       coroutine.yield()
     else
-      os.queueEvent("GRUBNULLEVENT")
+      os.queueEvent('GRUBNULLEVENT')
       sleep(.25)
     end
   end
@@ -62,21 +66,21 @@ end
 local function grub_selector()
   local tOS = lgrub.listOSes()
   local nTermX, nTermY = term.getSize()
-  local sSeparator = (" "):rep(nTermX) -- Create a separator string with the size of the terminal
+  local sSeparator = (' '):rep(nTermX) -- Create a separator string with the size of the terminal
   local continue = true
   local nSelection = 1 -- The current selection defaults at 1
   __GRUB_START_TIME = os.clock()
   grub_countdown('sleep')
   while continue do
     Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
-    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
     Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
     Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray)
     for nLine = 1, #tOS do
-      local sLine = " "
+      local sLine = ' '
       local fgColor = colors.white
       if nSelection == nLine then
-        sLine = ">"
+        sLine = '>'
         fgColor = colors.yellow
       end
       sLine = sLine..tOS[nLine][1]
@@ -102,7 +106,7 @@ local function grub_selector()
         if tOS[nSelection][2] then
           continue = false
         else
-          error("Error: Selection out of bounds: "..nSelection..'/'..#tOS)
+          error('Error: Selection out of bounds: '..nSelection..'/'..#tOS)
           nSelection = 1
         end
       end
