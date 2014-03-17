@@ -1,6 +1,4 @@
-if fs.exists('/install') then
-  fs.delete('/install')
-end
+shell.run('launcher') -- check for updates
 
 local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
 local __GRUB_COUNTDOWN_TIME = 15
@@ -132,6 +130,11 @@ while __continue do
   __continue = false -- default is to shutdown after os ends, if they haven't already
   if __osPath == 'CraftOS' then -- enable CraftOS support; not a boot option, must be enabled by OS
     term.clear()
+    Drawing.WriteStringToBuffer(1, 1, os.version(), colors.yellow, colors.black)
+    Drawing.DrawBuffer()
+    term.setCursorPos(1,2)
+    term.setTextColor(colors.white)
+    term.setBackgroundColor(colors.black)
     return -- end now, but without shutdown
   end
   if __osPath == 'Shutdown' then -- force immediate power down

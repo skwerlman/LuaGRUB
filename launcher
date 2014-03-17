@@ -1,0 +1,102 @@
+-- Thanks to SuicidalSTDz for writing this launcher framework
+
+--# USER VARIABLE(S)
+local shouldAutoUpdate = true
+
+--# Files to grab when updating/installing
+local tFiles = {
+    'startup',
+    'README.md',
+    'os/CraftOS/name.grub',
+    'os/CraftOS/startup',
+    'lgrub.sys/api/lgrub.lua',
+    'lgrub.sys/api/Drawing.lua', -- Thanks oeed!
+--    'lgrub.sys/api/wrappedFS.lua',
+  }
+local root = shell.dir() or ''
+local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
+
+--# Create directories if they are not present
+if not fs.exists( root .. '/os' ) then
+	fs.makeDir( root .. '/os' )
+end
+if not fs.exists( root .. '/lgrub.sys' ) then
+	fs.makeDir( root .. '/lgrub.sys' )
+end
+if not fs.exists( root .. '/lgrub.sys/api' ) then
+	fs.makeDir( root .. '/lgrub.sys/api' )
+end
+
+local function downloadFile( url, sFile )
+  local response = http.get( url )
+  if response then
+    local sResponse = response.readAll()
+    response.close()
+    
+    local handle = io.open( root .. sFile, 'w' )
+    handle.write( sResponse )
+    handle.close()
+    return true
+  else
+    return false
+  end
+end
+
+--# Main Update Script
+for i = 1, #tFiles do
+  
+  --# Grab the file and store it's contents in a string to check against later
+  local sResponse
+  local response = http.get( repo .. tFiles[ i ] )
+  if response then
+    sResponse = response.readAll()
+    response.close()
+  end
+  
+  --# Open the currently installed file to check against the downloaded file
+  local sFile = tFiles[ i ]:sub( 1, 1 ) .. '.' .. tFiles[ i ]:sub( 2, #tFiles[ i ] )
+  if not fs.exists( sFile ) then
+    local handle = io.open( sFile, 'w' )
+    handle.write( 'function help() return "This file was improperly downloaded, please try again later!" end' )
+    handle.close()
+  end
+  local handle = fs.open( sFile, 'r' )
+  local sData = handle.readAll()
+  handle.close()
+     
+  --# If the file does not exist or doesn't match the downloaded file, then update said file
+  if sResponse ~= '' then
+    if ( sData ~= sResponse and shouldAutoUpdate ) then
+      local handle = io.open( sFile, 'w' )
+      handle.write( sResponse, 'w' )
+      handle.close()
+      updated = true
+    end
+  end
+end
+
+--# Update the launcher, if need be
+local sRunning = shell.getRunningProgram()
+local response = http.get( repo .. 'launcher' )
+if response then
+  local sResponse = response.readAll()
+  response.close()
+  
+  local handle = fs.open( sRunning, 'r' )
+  local sData = handle.readAll()
+  handle.close()
+  
+  if sResponse ~= '' then
+    if ( sData ~= sResponse and shouldAutoUpdate ) then
+      fs.delete( sRunning )
+      local handle = io.open( sRunning, 'w' )
+      handle.write( sResponse )
+      handle.close()
+      updated = true
+    end
+  end
+end
+
+if updated then
+  os.reboot()
+end
