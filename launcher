@@ -17,7 +17,7 @@ local root = shell.dir() or ''
 local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
 local updated = false
 
-funtion output(n,n2,r,f,auto,u)
+function output(n,n2,r,f,auto,u)
   term.setCursorPos(1,1)
   term.clear()
   print(n..'/'..n2)
