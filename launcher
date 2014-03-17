@@ -58,17 +58,18 @@ local function downloadFile( url, sFile )
 end
 
 --# Main Update Script
+output(i,#tFiles+1,repo,'unknown',shouldAutoUpdate,updated)
 for i = 1, #tFiles do
+  local sFile = tFiles[i]
   --# Grab the file and store it's contents in a string to check against later
   local sResponse
-  local response = http.get( repo .. tFiles[i] )
+  local response = http.get( repo .. sFile )
   if response then
     sResponse = response.readAll()
     response.close()
   end
   
   --# Open the currently installed file to check against the downloaded file
-  local sFile = tFiles[i]
   if not fs.exists( sFile ) then
     local handle = fs.open( sFile, 'w' )
     handle.write( 'test' )
