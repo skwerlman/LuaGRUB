@@ -1,0 +1,8 @@
+if lgrub.enabled then
+  lgrub.bootNewOS('CraftOS') -- CraftOS handling is hard-coded
+  return
+else
+  printError('LuaGRUB not found')
+  sleep(4)
+  os.shutdown()
+end
