@@ -58,7 +58,7 @@ local function downloadFile( url, sFile )
 end
 
 --# Main Update Script
-output(i,#tFiles+1,repo,'unknown',shouldAutoUpdate,updated)
+output(0,#tFiles+1,repo,'unknown',shouldAutoUpdate,updated)
 for i = 1, #tFiles do
   local sFile = tFiles[i]
   --# Grab the file and store it's contents in a string to check against later
