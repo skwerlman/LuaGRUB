@@ -1,126 +1,143 @@
-local __GRUB_START_TIME = nil
+local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
 local __GRUB_COUNTDOWN_TIME = 15
 local __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME
 local __GRUB_RUN_TIME = nil -- calculated as os.clock - __GRUB_START_TIME
+
 function loadAPI(path) -- Thanks to theoriginalbit for this loadAPI replacer
-  local name=string.match(fs.getName(path),"(%a+)%.?.-")
-  local env=setmetatable({shell=shell},{__index=_G})
-  local func,err=loadfile(path)
+  local name = string.match(fs.getName(path), "(%a+)%.?.-")
+  local env = setmetatable({shell = shell}, { __index = _G }) -- passes a ref of the shell api to the loaded api
+  local func, err = loadfile(path)
   if not func then
-    return false,printError(err)
+    return false, printError(err)
   end
-  setfenv(func,env)
+  setfenv(func, env)
   func()
-  local api={}
+  local api = {}
   for k,v in pairs(env) do
-    api[k]=v
+    api[k] = v
   end
-  _G[name]=api
+  _G[name] = api
   return true
 end
-local __tempPEStorage=os.pullEvent
-os.pullEvent=os.pullEventRaw
-local h,w=term.getSize()
-loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua')
-loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Thank you, Oeed!
---loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua')
---fs = wrappedFS
+
+-- init
+local __tempPEStorage = os.pullEvent
+os.pullEvent = os.pullEventRaw -- Prevent ctrl-T
+local h, w = term.getSize()
+loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes to list other OSes by name, and also what we use here.
+loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
+--loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
+--fs = wrappedFS -- Replace the standard fs with wrappedFS
+-- ^^ Not yet functional, but planned
 lgrub.init(shell)
 Drawing.Clear()
 Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
 Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
 Drawing.DrawBuffer()
+
+-- event spam
 function grub_evnt()
   while true do
     os.queueEvent("GRUBNULLEVENT")
     sleep(.1)
   end
 end
+
+-- timer
 local function grub_countdown(e)
-  if __GRUB_TIME_LEFT=='infinity' then return end
-  __GRUB_RUN_TIME=os.clock()-__GRUB_START_TIME
-  if e=='key' then
-    __GRUB_TIME_LEFT='infinity'
+  if __GRUB_TIME_LEFT == 'infinity' then return end
+  __GRUB_RUN_TIME = os.clock() - __GRUB_START_TIME
+  if e == 'key' then
+    __GRUB_TIME_LEFT = 'infinity'
   else
-  	__GRUB_TIME_LEFT=math.floor(__GRUB_COUNTDOWN_TIME-__GRUB_RUN_TIME)
+  	__GRUB_TIME_LEFT = math.floor(__GRUB_COUNTDOWN_TIME - __GRUB_RUN_TIME)
   end
 end
+
+-- main loop
 local function grub_selector()
-  local tOS=lgrub.listOSes()
-  local nTermX,nTermY=term.getSize()
-  local sSeparator=(" "):rep(nTermX)
-  local continue=true
-  local nSelection=1
-  __GRUB_START_TIME=os.clock()
+  local tOS = lgrub.listOSes()
+  local nTermX, nTermY = term.getSize()
+  local sSeparator = (" "):rep(nTermX) -- Create a separator string with the size of the terminal
+  local continue = true
+  local nSelection = 1 -- The current selection defaults at 1
+  __GRUB_START_TIME = os.clock()
   grub_countdown('sleep')
   while continue do
-    Drawing.DrawArea(1,1,Drawing.Screen.Width,1,' ',colors.lightGray,colors.lightGray)
-    Drawing.DrawCharactersCenter(nil,1,nil,1,'LuaGrub v'..lgrub.version,colors.black,colors.lightGray)
-    Drawing.DrawArea(1,Drawing.Screen.Height,Drawing.Screen.Width,1,' ',colors.lightGray,colors.lightGray)
-    Drawing.DrawCharactersCenter(nil,Drawing.Screen.Height,nil,1,__GRUB_TIME_LEFT..' seconds left to decide',colors.black,colors.lightGray)
-    for nLine=1,#tOS do
-      local sLine=" "
-      local fgColor=colors.white
-      if nSelection==nLine then
-        sLine=">"
-        fgColor=colors.yellow
+    Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
+    Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray)
+    for nLine = 1, #tOS do
+      local sLine = " "
+      local fgColor = colors.white
+      if nSelection == nLine then
+        sLine = ">"
+        fgColor = colors.yellow
       end
-      sLine=sLine..tOS[nLine][1]
-      Drawing.WriteStringToBuffer(2,nLine+1,sLine,fgColor,colors.black)
+      sLine = sLine..tOS[nLine][1]
+      Drawing.WriteStringToBuffer(2, nLine + 1, sLine, fgColor, colors.black)
     end
     coroutine.yield()
-    local sEvent,nKey=__tempPEStorage()
+    local sEvent, nKey = __tempPEStorage()
     Drawing.DrawBuffer()
-    if sEvent=='key' then
+    if sEvent == 'key' then
       grub_countdown('key')
-      if nKey==200 or nKey==17 then
-        if tOS[nSelection-1] then
-          nSelection=nSelection-1
+      if nKey == 200 or nKey == 17 then
+        if tOS[nSelection - 1] then
+          nSelection = nSelection - 1
         else
-          nSelection=#tOS
+          nSelection = #tOS
         end
-      elseif nKey==208 or nKey==31  then
-        if tOS[nSelection+1] then
-          nSelection=nSelection+1
+      elseif nKey == 208 or nKey == 31  then
+        if tOS[nSelection + 1] then
+          nSelection = nSelection + 1
         else
-          nSelection=1
+          nSelection = 1
         end
-      elseif nKey==28 then
+      elseif nKey == 28 then
         if tOS[nSelection][2] then
-          continue=false
+          continue = false
         else
           error("Error: Selection out of bounds: "..nSelection..'/'..#tOS)
+          nSelection = 1
         end
       end
     else
       grub_countdown('sleep')
     end
-    if __GRUB_TIME_LEFT==0 then
+    if __GRUB_TIME_LEFT == 0 then
       lgrub.prepForRun(tOS[nSelection][2])
       return
     end
   end
   lgrub.prepForRun(tOS[nSelection][2])
 end
-parallel.waitForAny(grub_selector,grub_evnt)
-local __osPath=lgrub.getPrepped()
-local __continue=true
+
+-- exec timer/main loop
+
+parallel.waitForAny(grub_selector, grub_evnt) -- Wait up to fifteen seconds for user input, or use the first OS in the list
+local __osPath = lgrub.getPrepped()
+
+-- exec OS
+local __continue = true
 while __continue do
-  __continue=false
-  if __osPath=='CraftOS' then
+  __continue = false -- default is to shutdown after os ends, if they haven't already
+  if __osPath == 'CraftOS' then -- enable CraftOS support; not a boot option, must be enabled by OS
     term.clear()
-    return
+    return -- end now, but without shutdown
   end
-  if __osPath=='Shutdown' then
+  if __osPath == 'Shutdown' then -- force immediate power down
     os.shutdown()
   end
-  os.pullEvent=__tempPEStorage
+  os.pullEvent = __tempPEStorage -- Restore os.pullEvent to prevent possible conflicts
   lgrub.run(__osPath..'/startup')
-  os.pullEvent=os.pullEventRaw
+  os.pullEvent = os.pullEventRaw -- Prevent ctrl-t again
   if lgrub.goAgain() then
-    __osPath=lgrub.newOS
-    __continue=true
+    __osPath = lgrub.newOS
+    __continue = true
     lgrub.done()
   end
 end
-os.shutdown()
+-- power down
+os.shutdown() -- This is always skipped for CraftOS, and usually won't be run ever, unless the OS forgets to power down. This helps prevent hacking/mistakes.
