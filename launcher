@@ -17,6 +17,15 @@ local root = shell.dir() or ''
 local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
 local updated = false
 
+funtion output(n,n2,r,f,auto,u)
+  term.setCursorPos(1,1)
+  term.clear()
+  print(n..'/'..n2)
+  print(r..f..' ==> '..f)
+  print(auto)
+  print(u)
+end
+
 --# Create directories if they are not present
 if not fs.exists( root .. '/os' ) then
 	fs.makeDir( root .. '/os' )
@@ -76,22 +85,12 @@ for i = 1, #tFiles do
       updated = true
     end
   end
-  term.setCursorPos(1,1)
-  term.clear()
-  print(i..'/'..(#tFiles+1))
-  print(repo..sFile..' ==> '..sFile)
-  print(shouldAutoUpdate)
-  print(updated)
+  output(i,#tFiles+1,repo,sFile,shouldAutoUpdate,updated)
 end
 
 --# Update the launcher, if need be
 
-term.setCursorPos(1,1)
-term.clear()
-print((#tFiles+1)..'/'..(#tFiles+1))
-print(repo..'launcher'..' ==> '..'launcher')
-print(shouldAutoUpdate)
-print(updated)
+output(#tFiles+1,#tFiles+1,repo,'launcher',shouldAutoUpdate,updated)
 
 local sRunning = shell.getRunningProgram()
 local response = http.get( repo .. 'launcher' )
@@ -112,12 +111,7 @@ if response then
       updated = true
     end
   end
-  term.setCursorPos(1,1)
-  term.clear()
-  print((#tFiles+1)..'/'..(#tFiles+1))
-  print(repo..'launcher'..' ==> '..'launcher')
-  print(shouldAutoUpdate)
-  print(updated)
+  output(#tFiles+1,#tFiles+1,repo,'launcher',shouldAutoUpdate,updated)
 end
 
 if updated then
