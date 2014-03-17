@@ -1,5 +1,7 @@
 -- Thanks to SuicidalSTDz for writing this launcher framework
 
+-- force a self-update
+
 --# USER VARIABLE(S)
 local shouldAutoUpdate = true
 
