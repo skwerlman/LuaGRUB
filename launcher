@@ -15,6 +15,7 @@ local tFiles = {
   }
 local root = shell.dir() or ''
 local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
+local updated = false
 
 --# Create directories if they are not present
 if not fs.exists( root .. '/os' ) then
@@ -78,12 +79,10 @@ for i = 1, #tFiles do
   term.setCursorPos(1,1)
   term.clear()
   print(i..'/'..#tFiles)
-  print(sFile)
-  print(repo..tFiles[i])
+  print(repo..sFile..' ==> '..sFile)
   print(updated)
 end
 
---[[
 --# Update the launcher, if need be
 local sRunning = shell.getRunningProgram()
 local response = http.get( repo .. 'launcher' )
@@ -105,7 +104,6 @@ if response then
     end
   end
 end
-]]--
 
 if updated then
   os.reboot()

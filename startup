@@ -1,7 +1,7 @@
 shell.run('launcher') -- check for updates
 
 local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
-local __GRUB_COUNTDOWN_TIME = 15
+local __GRUB_COUNTDOWN_TIME = 16
 local __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME
 local __GRUB_RUN_TIME = nil -- calculated as os.clock - __GRUB_START_TIME
 
