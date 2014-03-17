@@ -1,3 +1,13 @@
+function output(n,n2,r,f,auto,u)
+  term.setCursorPos(1,1)
+  term.clear()
+  print(n..'/'..n2)
+  print(r..f..' ==> '..f)
+  print(auto)
+  print(u)
+end
+output('?','?','unknown','','unknown','unknown')
+
 -- Thanks to SuicidalSTDz for writing this launcher framework
 
 --# USER VARIABLE(S)
@@ -13,18 +23,10 @@ local tFiles = {
     'lgrub.sys/api/Drawing.lua', -- Thanks oeed!
 --    'lgrub.sys/api/wrappedFS.lua',
   }
-local root = shell.dir() or ''
 local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
-local updated = false
 
-function output(n,n2,r,f,auto,u)
-  term.setCursorPos(1,1)
-  term.clear()
-  print(n..'/'..n2)
-  print(r..f..' ==> '..f)
-  print(auto)
-  print(u)
-end
+local root = shell.dir() or ''
+local updated = false
 
 --# Create directories if they are not present
 if not fs.exists( root .. '/os' ) then
