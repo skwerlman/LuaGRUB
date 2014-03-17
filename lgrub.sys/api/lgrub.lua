@@ -1,4 +1,4 @@
-version = '1.0.0'
+version = '1.0.1'
 enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
 
 local shell, grubDir, tempOS, newOS
