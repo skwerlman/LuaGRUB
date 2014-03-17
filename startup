@@ -37,9 +37,12 @@ Drawing.DrawBuffer()
 
 -- event spam
 function grub_evnt()
-  while true do
+  for i=0, 25 do
     os.queueEvent("GRUBNULLEVENT")
     sleep(.1)
+  end
+  while true do
+    coroutine.yield()
   end
 end
 
@@ -78,9 +81,8 @@ local function grub_selector()
       sLine = sLine..tOS[nLine][1]
       Drawing.WriteStringToBuffer(2, nLine + 1, sLine, fgColor, colors.black)
     end
-    coroutine.yield()
-    local sEvent, nKey = __tempPEStorage()
     Drawing.DrawBuffer()
+    local sEvent, nKey = __tempPEStorage()
     if sEvent == 'key' then
       grub_countdown('key')
       if nKey == 200 or nKey == 17 then
@@ -134,7 +136,7 @@ while __continue do
   lgrub.run(__osPath..'/startup')
   os.pullEvent = os.pullEventRaw -- Prevent ctrl-t again
   if lgrub.goAgain() then
-    __osPath = lgrub.newOS
+    __osPath = lgrub.getNewOS()
     __continue = true
     lgrub.done()
   end
