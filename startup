@@ -37,9 +37,9 @@ Drawing.DrawBuffer()
 
 -- event spam
 function grub_evnt()
-  for i=0, 25 do
+  while not __GRUB_TIME_LEFT == 'infinity' do
     os.queueEvent("GRUBNULLEVENT")
-    sleep(.1)
+    sleep(.25)
   end
   while true do
     coroutine.yield()
