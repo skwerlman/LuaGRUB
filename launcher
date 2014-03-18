@@ -31,7 +31,7 @@ local tFiles = {
     'lgrub.sys/api/Drawing.lua', -- Thanks oeed!
 --    'lgrub.sys/api/wrappedFS.lua',
   }
-local repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
+local repo = 'https://raw.github.com/skwerlman/LGRUB-stable/master/'
 
 local root = shell.dir() or ''
 local updated = false
