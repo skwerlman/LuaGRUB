@@ -1,341 +1,163 @@
-isDebug = false
+local isDebug = true
 
-oldTerm = term
-
---[[
-term.setBackgroundColour(colours.white)
-term.setTextColour(colours.black)
-term.clear()
-]]--
-
---local _, err = pcall(function()
-
-local tAPIsLoading = {}
-
-local Extension = function(path, addDot)
-	if not path then
-		return nil
-	elseif not string.find(fs.getName(path), '%.') then
-		if not addDot then
-			return fs.getName(path)
-		else
-			return ''
-		end
-	else
-		local _path = path
-		if path:sub(#path) == '/' then
-			_path = path:sub(1,#path-1)
-		end
-		local extension = _path:gmatch('\.[0-9a-z]+$')()
-		if extension then
-			extension = extension:sub(2)
-		else
-			--extension = nil
-			return ''
-		end
-		if addDot then
-			extension = '.'..extension
-		end
-		return extension:lower()
-	end
+if not isDebug then
+  shell.run('launcher') -- check for updates
 end
 
-local RemoveExtension = function(path)
-	if path:sub(1,1) == '.' then
-		return path
-	end
-	local extension = Extension(path)
-	if extension == path then
-		return fs.getName(path)
-	end
-	return string.gsub(path, extension, ''):sub(1, -2)
+local oldfs = fs
+local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
+local __GRUB_COUNTDOWN_TIME = 16
+local __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME
+local __GRUB_RUN_TIME = nil -- calculated as os.clock - __GRUB_START_TIME
+
+function loadAPI(path) -- Thanks to theoriginalbit for this loadAPI replacer
+  local name = string.match(fs.getName(path), '(%a+)%.?.-')
+  local env = setmetatable({shell = shell}, { __index = _G }) -- passes a ref of the shell api to the loaded api
+  local func, err = loadfile(path)
+  if not func then
+    return false, printError(err)
+  end
+  setfenv(func, env)
+  func()
+  local api = {}
+  for k,v in pairs(env) do
+    api[k] = v
+  end
+  _G[name] = api
+  return true
 end
 
-function LoadAPI(_sPath)
-	local sName = RemoveExtension(fs.getName( _sPath ))
-	if tAPIsLoading[sName] == true then
-		printError( "API "..sName.." is already being loaded" )
-		return false
-	end
-	tAPIsLoading[sName] = true
-		
-	local tEnv = {}
-	setmetatable( tEnv, { __index = getfenv() } )
-	local fnAPI, err = loadfile( _sPath )
-	if fnAPI then
-		setfenv( fnAPI, tEnv )
-		fnAPI()
-	else
-		printError( err )
-        tAPIsLoading[sName] = nil
-		return false
-	end
-	
-	local tAPI = {}
-	for k,v in pairs( tEnv ) do
-		tAPI[k] =  v
-	end
-	
-	getfenv()[sName] = tAPI
+-- init
+local __tempPEStorage = os.pullEvent
+os.pullEvent = os.pullEventRaw -- Prevent ctrl-T
+local h, w = term.getSize()
+loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes to list other OSes by name, and also what we use here.
+loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
+if isDebug then
+  shell.run(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
+  fs = wrappedFS -- Replace the standard fs with wrappedFS
+end
+lgrub.init(shell)
+Drawing.Clear()
+Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
+Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
+Drawing.DrawBuffer()
 
-	tAPIsLoading[sName] = nil
-	return true
+-- event spam
+function grub_evnt()
+  while true do
+    if __GRUB_TIME_LEFT == 'infinity' then
+      coroutine.yield()
+    else
+      os.queueEvent('GRUBNULLEVENT')
+      sleep(.25)
+    end
+  end
 end
 
-term.setCursorPos(1,1)
-root = ''
-
-function PrintCentered(text, y)
-    local w, h = term.getSize()
-    x = math.ceil(math.ceil((w / 2) - (#text / 2)), 0)+1
-    term.setCursorPos(x, y)
-    print(text)
+-- timer
+local function grub_countdown(e)
+  if __GRUB_TIME_LEFT == 'infinity' then return end
+  __GRUB_RUN_TIME = os.clock() - __GRUB_START_TIME
+  if e == 'key' then
+    __GRUB_TIME_LEFT = 'infinity'
+  else
+  	__GRUB_TIME_LEFT = math.floor(__GRUB_COUNTDOWN_TIME - __GRUB_RUN_TIME)
+  end
 end
 
-function LoadingScreen()
-	if fs.getFreeSpace and fs.getFreeSpace('/') < 51200 then
-		term.setBackgroundColor(colours.grey)
-		term.setTextColor(colours.white)
-		term.clear()
-
-		PrintCentered('You have less than 50KB of free space remaining!', 6)
-		PrintCentered('You may encounter crashes due to this.' , 7)
-		term.setTextColor(colours.lightGrey)
-
-		PrintCentered('Try to free up some space, open \'About OneOS\'' , 9)
-		PrintCentered('in the One menu for more information.' , 10)
-		term.setTextColor(colours.white)
-
-		PrintCentered('Click anywhere to continue.', 12)
-
-		os.pullEvent('mouse_click')
-	end
-
-	term.setBackgroundColour(colours.black)	
-	term.clear()
-	sleep(0.1)
-	term.setBackgroundColour(colours.grey)
-	term.clear()
-	sleep(0.1)
-	term.setBackgroundColour(colours.lightGrey)
-	term.clear()
-	sleep(0.1)
-
-	local screenWidth, screenHeight = term.getSize()
-	term.setBackgroundColour(colours.white)	
-	term.clear()
-	local x = (screenWidth - 14) / 2
-	local y = (screenHeight - 9) / 2
-
-	local text = 'OneOS by oeed'
-	term.setCursorPos((screenWidth - #text) / 2, y + 13)
-	term.setTextColour(colours.blue)
-	term.write(text)
-
-	local currentImage = -1
-	local totalAPIs = #fs.list(root .. 'System/API/')
-
-	for _, file in pairs(fs.list(root .. 'System/API/')) do
-		if string.sub(file,1,1) ~= "." then
-			--print('Loading: ' .. file)
-			if math.floor(_*(8/totalAPIs)) ~= currentImage then
-				currentImage = math.floor(_*(8/totalAPIs))
-				local image = paintutils.loadImage('System/Images/Boot/boot'..currentImage)
-				paintutils.drawImage(image, x, y)
-			end
-			term.setBackgroundColor(colours.white)
-			term.setCursorPos(1, y + 11)
-			
-			term.clearLine()
-			PrintCentered('Loading API '..file, y + 11)
-			sleep(0)
-			if not LoadAPI(root .. 'System/API/' .. file) then
-				term.setTextColour(colours.red)
-				PrintCentered('Error While Loading API '..file, y + 11)
-				term.setCursorPos(1, 1)
-				return false
-			end
-		end
-	end
-	sleep(0.1)
-	return true
+-- main loop
+local function grub_selector()
+  local tOS = lgrub.listOSes()
+  local nTermX, nTermY = term.getSize()
+  local sSeparator = (' '):rep(nTermX) -- Create a separator string with the size of the terminal
+  local continue = true
+  local nSelection = 1 -- The current selection defaults at 1
+  __GRUB_START_TIME = os.clock()
+  grub_countdown('sleep')
+  while continue do
+    Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray)
+    Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
+    Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray)
+    for nLine = 1, #tOS do
+      local sLine = ' '
+      local fgColor = colors.white
+      if nSelection == nLine then
+        sLine = '>'
+        fgColor = colors.yellow
+      end
+      sLine = sLine..tOS[nLine][1]
+      Drawing.WriteStringToBuffer(2, nLine + 1, sLine, fgColor, colors.black)
+    end
+    Drawing.DrawBuffer()
+    local sEvent, nKey = __tempPEStorage()
+    if sEvent == 'key' then
+      grub_countdown('key')
+      if nKey == 200 or nKey == 17 then
+        if tOS[nSelection - 1] then
+          nSelection = nSelection - 1
+        else
+          nSelection = #tOS
+        end
+      elseif nKey == 208 or nKey == 31  then
+        if tOS[nSelection + 1] then
+          nSelection = nSelection + 1
+        else
+          nSelection = 1
+        end
+      elseif nKey == 28 then
+        if tOS[nSelection][2] then
+          continue = false
+        else
+          error('Error: Selection out of bounds: '..nSelection..'/'..#tOS)
+          nSelection = 1
+        end
+      end
+    else
+      grub_countdown('sleep')
+    end
+    if __GRUB_TIME_LEFT == 0 then
+      lgrub.prepForRun(tOS[nSelection][2])
+      return
+    end
+  end
+  lgrub.prepForRun(tOS[nSelection][2])
 end
 
-if not term.isColour() then
-	term.setBackgroundColor(colours.black)
-	term.setTextColor(colours.white)
-	term.clear()
+-- exec timer/main loop
 
-	PrintCentered('OneOS requires an advanced (gold) computer.', 8)
+parallel.waitForAny(grub_selector, grub_evnt) -- Wait up to fifteen seconds for user input, or use the first OS in the list
+local __osPath = lgrub.getPrepped()
 
-	PrintCentered('Press any key to return to the shell.', 10)
-
-	os.pullEvent('key')
-	term.clear()
-	term.setCursorPos(1,1)
-
-elseif LoadingScreen() then
-
-	if fs.exists('/.update/') and fs.isDir('/.update/') then
-		if not fs.exists('/.update/.version') then
-			fs.delete('/.update/')
-		else
-
-			function installFolder(path)
-				for i, v in ipairs(fs.list('/.update/'..path)) do
-					Drawing.DrawArea(1, math.floor(Drawing.Screen.Height / 2), Drawing.Screen.Width, 1, ' ', colours.lightGrey, colours.white)
-					Drawing.DrawCharactersCenter(nil, 0, nil, nil, path .. v, colours.lightGrey, colours.white)
-					Drawing.DrawBuffer()
-					if fs.isDir('/.update/'..path .. v) then
-						fs.makeDir('/'..path .. v)
-						installFolder(path .. v .. '/')
-					else
-						fs.delete('/'..path .. v)
-						fs.move('/.update/'..path .. v, '/'..path .. v)
-					end
-					sleep(0)
-				end
-			end
-			Drawing.Clear(colours.white)
-			Drawing.DrawCharactersCenter(nil, -3, nil, nil, 'Installing Update', colours.blue, colours.white)
-			Drawing.DrawCharactersCenter(nil, -2, nil, nil, 'This may take a moment.', colours.grey, colours.white)
-			Drawing.DrawBuffer()
-			installFolder('')
-			fs.delete('/.update/')
-		end
-	end
-
-	os.run(getfenv(), '/System/main.lua')
-
-	local ok = nil
-	if not fs.exists('/System/.version') or not fs.exists('/System/.OneOS.settings') then
-		if fs.exists('/System/.OneOS.settings') then
-			fs.delete('/System/.OneOS.settings')
-		end
-		ok = {pcall(FirstSetup)}
-	else
-		ok = {pcall(Initialise)}
-	end
-
-
-
-
-
-	if not ok[1] then
-		xpcall(function()loadfile('/System/main.lua')end, function(err)
-			table.insert(ok, err)
-		end)
-		--if the crash is a too long without yeilding error then there's nothing we can really do, restart
-		if ok[2]:sub(-25) == 'Too long without yielding' then
-			term.setBackgroundColor(colours.grey)
-			term.setTextColor(colours.white)
-			term.clear()
-			local w,h = term.getSize()
-			if fs.exists('System/Images/crash') then
-				paintutils.drawImage(paintutils.loadImage('System/Images/crash'), (w-7)/2 + 1, 3)
-			end
-			term.setBackgroundColor(colours.grey)
-			term.setTextColor(colours.white)
-
-			PrintCentered('OneOS has been forced to reboot', 8)	
-
-			PrintCentered('You likely let your (real) computer go to sleep', 10)
-			PrintCentered('or there was some huge amount of lag.', 11)
-			PrintCentered('Unfortunately, there\'s no way to recover from this.', 13)
-
-			PrintCentered('Click anywhere to reboot.', 15)
-
-			os.pullEvent('mouse_click')
-			os.reboot()
-		end
-
-		term.setBackgroundColor(colours.grey)
-		term.setTextColor(colours.white)
-		term.clear()
-		local w,h = term.getSize()
-		if fs.exists('System/Images/crash') then
-			paintutils.drawImage(paintutils.loadImage('System/Images/crash'), (w-7)/2 + 1, 3)
-		else
-			table.insert(ok, 'Crash image nonexistent!')
-		end
-		term.setBackgroundColor(colours.grey)
-		term.setTextColor(colours.white)
-
-		PrintCentered('OneOS has crashed!', 8)
-
-		PrintCentered('OneOS has encountered a serious error,', 10)
-		PrintCentered('click anywhere to reboot.', 11)
-
-		term.setTextColor(colours.lightGrey)
-		table.remove(ok, 1)
-		for i, v in ipairs(ok) do
-			local w, h = term.getSize()
-		    x = math.ceil(math.ceil((w / 2) - (#v / 2)), 0)+1
-		    if x < 1 then
-		    	x = 1
-		    end
-		    term.setCursorPos(x, i+12)
-		    print(v)
-		end
-
-		PrintCentered('Please report this on the forum.', Drawing.Screen.Height)
-		term.setTextColor(colours.white)
-		if http then
-			PrintCentered('Sending error report, please wait.', Drawing.Screen.Height-3)
-			local success = false
-			parallel.waitForAny(function()sleep(4) end, function()
-				local detail = {message='Crashed Before Main Initialise', time = os.clock(), errors = ok}
-				if Current and Current.Programs then
-					detail.message = 'Crashed After Main Initialise'
-					detail.programs = {}
-					for i, v in ipairs(Current.Programs) do
-						table.insert(detail.programs, v.Name)
-					end
-				end
-				local version = '?'
-
-				local h = fs.open('/System/.version', 'r')
-				if h then
-					version = h.readAll()
-					h.close()
-				else
-					version = '?'
-				end
-				if not isDebug then
-					local _ = http.post('http://olivercooper.me/errorSubmit.php', 
-	                                "product="..textutils.urlEncode(tostring('OneOS')).."&"..
-	                                "version="..textutils.urlEncode(tostring(version)).."&"..
-	                                "error="..textutils.urlEncode(ok[1]).."&"..
-	                                "detail="..textutils.urlEncode(textutils.serialize(detail)));
-					if _ then
-						success = true
-					end
-				end
-			end)
-			local message = 'Error report failed!'
-			if success then
-				message = 'Error report sent!'
-			end
-			term.setCursorPos(1, Drawing.Screen.Height-3)
-			term.clearLine()
-			PrintCentered(message..' Click to reboot.', Drawing.Screen.Height-3)
-		end
-
-		os.pullEvent('mouse_click')
-		os.reboot()
-	end
-	--[[end)
-	if err then
-		local w, h = term.getSize()
-		local x = w/2
-		local y = h/2
-		local warning = "A fatal error occured"
-		term.setCursorPos(x-(#warning/2), y)
-		term.clearLine()
-		term.write(warning)
-		print()
-		print()
-		term.setTextColour(colours.red)
-		print(err)
-	end]]
+-- exec OS
+local __continue = true
+while __continue do
+  __continue = false -- default is to shutdown after os ends, if they haven't already
+  if __osPath == 'CraftOS' then -- enable CraftOS support; not a boot option, must be enabled by OS
+    term.clear()
+    Drawing.WriteStringToBuffer(1, 1, os.version(), colors.yellow, colors.black)
+    Drawing.DrawBuffer()
+    term.setCursorPos(1,2)
+    term.setTextColor(colors.white)
+    term.setBackgroundColor(colors.black)
+    return -- end now, but without shutdown
+  end
+  if __osPath == 'Shutdown' then -- force immediate power down
+    os.shutdown()
+  end
+  os.pullEvent = __tempPEStorage -- Restore os.pullEvent to prevent possible conflicts
+  lgrub.run(__osPath..'/startup')
+  os.pullEvent = os.pullEventRaw -- Prevent ctrl-t again
+  if lgrub.goAgain() then
+    __osPath = lgrub.getNewOS()
+    __continue = true
+    lgrub.done()
+  end
 end
+if isDebug then
+  printError("End Of OS Code")
+  sleep(5)
+end
+-- power down
+os.shutdown() -- This is always skipped for CraftOS, and usually won't be run ever, unless the OS forgets to power down. This helps prevent hacking/mistakes.
