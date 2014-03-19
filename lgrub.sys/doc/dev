@@ -1,0 +1,44 @@
+Unless you plan on writing an OS that can interact with the lgrub.lua API, you don't need to read this.
+
++-----------------------+
+|toc00 Table of contents|
+|toc01 File Structure   |
+|toc02 lgrub API        |
+|toc03 wrappedFS API    |
++-----------------------+
+
+toc01
+LuaGRUB File Structure
+The file structure is relatively simple.
+All the OSes go in /os, while all the APIs and docs go into lgrub.sys
+Each OS must have a startup file inside its folder, and optionally a file called 'name.grub'
+name.grub is the file that stores the prettyprint name of the OS. For example, in the included '/os/CraftOS/' folder, name.grub has 'CraftOS' on the first line. There is additional descriptive text on the following lines, but it is ignored in the current version.
+
+toc02
+Using the lgrub API
+The lgrub API is located at '/lgrub.sys/api/lgrub.lua'
+It contains several functions that can be used by an OS to find other OSes, reboot directly into itself without loading the bootloader, bot  directly into another OS the same way, as well as several other functions.
+
+bootNewOS(osPath)
+This command sets an internal API variable so if you exit the OS (not reboot) the OS at the path given will start.
+
+rebootOS()
+This command sets an internal API variable so if you exit the OS (not reboot) the same OS will start again.
+
+listOSes()
+Returns a table of 2-element tables containing both the pettyprint name (if there is one) of each OS and the path to each OS.
+This can be used by an OS to 
+
+run(osName)
+This is the command that actually executes the OS. It shouldn't be needed by an OS, but it's important enough to warrant documentation.
+
+init(shellRef)
+This command changes the shell used by the API. You can use this in combination with run() to execute lightweight OSes without leaving your OS. The mini-OS will have to be in a folder named 'os' similar to the setup in root.
+
+There are several other functions used by the bootloader that shouldn't be needed by an OS, so they aren't documented here. Feel free to look inside the API itself, of course.
+
+toc03
+About the wrappedFS API
+This is an API that is planned for the next release.
+It will wrap the filesystem, and change how the io API responds, tricking OSes into thinking they are in the root folder.
+This will mean that both absolute and relative paths will reslove to /os/osName/path rather than /path
