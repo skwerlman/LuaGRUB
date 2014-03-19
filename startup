@@ -1,5 +1,10 @@
-shell.run('launcher') -- check for updates
+local isDebug = true
 
+if not isDebug then
+  shell.run('launcher') -- check for updates
+end
+
+local oldfs = fs
 local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run
 local __GRUB_COUNTDOWN_TIME = 16
 local __GRUB_TIME_LEFT = __GRUB_COUNTDOWN_TIME
@@ -28,9 +33,11 @@ os.pullEvent = os.pullEventRaw -- Prevent ctrl-T
 local h, w = term.getSize()
 loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes to list other OSes by name, and also what we use here.
 loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
---loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
---fs = wrappedFS -- Replace the standard fs with wrappedFS
--- ^^ Not yet functional, but planned
+if isDebug then
+  loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
+  wrappedFS.init(fs)
+  fs = wrappedFS -- Replace the standard fs with wrappedFS
+end
 lgrub.init(shell)
 Drawing.Clear()
 Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
