@@ -2,8 +2,9 @@
 
 local oldFS
 
-function init(fileSystem)
+function init(fileSystem, l)
   oldFS = fileSystem
+  lgrub = l
 end
 
 --wrapped functions
@@ -44,7 +45,7 @@ function delete(path)
   return oldFS.delete(lgrub.thisOS..path)
 end
 function combine(basePath, localPath)
-  return oldFS.combine(lgrub.thisOS..basePath, lgrub.thisOS..localPath
+  return oldFS.combine(lgrub.thisOS..basePath, lgrub.thisOS..localPath)
 end
 function open(path, mode)
   return oldFS.open(lgrub.thisOS..path, mode)

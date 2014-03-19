@@ -35,7 +35,7 @@ loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes
 loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
 if isDebug then
   loadAPI(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
-  wrappedFS.init(fs)
+  wrappedFS.init(fs, lgrub)
   fs = wrappedFS -- Replace the standard fs with wrappedFS
 end
 lgrub.init(shell)
