@@ -1,11 +1,6 @@
 -- run 'wrappedFS.init(fs) fs = wrappedFS' after 'os.loadAPI'
 
-local oldFS
-
-function init(fileSystem, l)
-  oldFS = fileSystem
-  lgrub = l
-end
+local oldFS = fs
 
 --wrapped functions
 function list(path)

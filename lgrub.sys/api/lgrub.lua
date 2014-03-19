@@ -1,5 +1,6 @@
 version = '1.0.1'
 enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
+thisOS = nil
 
 local shell, grubDir, tempOS, newOS
 local cont = false -- been having weird problems with public variables, had to wrap them in functions
