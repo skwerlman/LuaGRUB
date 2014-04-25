@@ -81,7 +81,7 @@ local function grub_selector()
     Drawing.DrawCharactersCenter(1, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray) -- write version to buffer
     Drawing.DrawCharactersCenter(1, 2, nil, 1, splash.text, colors.black, colors.lightGray) -- write splash to buffer
     Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray) -- time left bg
-    Drawing.DrawCharactersCenter(1, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray) -- write time left to buffer
+    Drawing.DrawCharactersCenter(1, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide; any key cancels timer', colors.black, colors.lightGray) -- write time left to buffer
     for nLine = 1, #tOS do
       local sLine = ' '
       local fgColor = colors.white
