@@ -31,6 +31,7 @@ end
 local __tempPEStorage = os.pullEvent
 os.pullEvent = os.pullEventRaw -- Prevent ctrl-T
 local h, w = term.getSize()
+loadAPI(shell.dir()..'lgrub.sys/splash.lua') -- splash text
 loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes to list other OSes by name, and also what we use here.
 loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
 if isDebug then
@@ -39,11 +40,12 @@ if isDebug then
 end
 lgrub.init(shell)
 Drawing.Clear()
-Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
-Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray)
-Drawing.DrawBuffer()
+Drawing.DrawArea(1, 1, Drawing.Screen.Width, 2, ' ', colors.lightGray, colors.lightGray) -- version + splash bg
+Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGrub v'..lgrub.version, colors.black, colors.lightGray) -- write version to buffer
+Drawing.DrawCharactersCenter(nil, 2, nil, 1, splash.text, colors.black, colors.lightGray) -- write splash to buffer
+Drawing.DrawBuffer() -- paint buffer to screen
 
--- event spam
+-- event spam; necessary to keep timer working
 function grub_evnt()
   while true do
     if __GRUB_TIME_LEFT == 'infinity' then
@@ -76,10 +78,11 @@ local function grub_selector()
   __GRUB_START_TIME = os.clock()
   grub_countdown('sleep')
   while continue do
-    Drawing.DrawArea(1, 1, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
-    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray)
-    Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray)
-    Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray)
+    Drawing.DrawArea(1, 1, Drawing.Screen.Width, 2, ' ', colors.lightGray, colors.lightGray) -- version + splash bg
+    Drawing.DrawCharactersCenter(nil, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray) -- write version to buffer
+    Drawing.DrawCharactersCenter(nil, 2, nil, 1, splash.text, colors.black, colors.lightGray) -- write splash to buffer
+    Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray) -- time left bg
+    Drawing.DrawCharactersCenter(nil, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide', colors.black, colors.lightGray) -- write time left to buffer
     for nLine = 1, #tOS do
       local sLine = ' '
       local fgColor = colors.white
@@ -88,9 +91,9 @@ local function grub_selector()
         fgColor = colors.yellow
       end
       sLine = sLine..tOS[nLine][1]
-      Drawing.WriteStringToBuffer(2, nLine + 1, sLine, fgColor, colors.black)
+      Drawing.WriteStringToBuffer(2, nLine + 2, sLine, fgColor, colors.black) -- write OS name to buffer
     end
-    Drawing.DrawBuffer()
+    Drawing.DrawBuffer() -- paint buffer to screen
     local sEvent, nKey = __tempPEStorage()
     if sEvent == 'key' then
       grub_countdown('key')

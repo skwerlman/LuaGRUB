@@ -1,7 +1,7 @@
 -- Splash text!
 
 -- Add more if you want!
-text = {
+local texts = {
    --MAXLEN-48-------------------------------------  
   "Lua means 'toilet' or 'bathroom' in Hawaiian!",
   "Teaching Lua all about itself!",
@@ -53,4 +53,6 @@ text = {
   "Semantically Versioned!",
 }
 
-count = #text
+local _w = term.getSize()
+text = texts[math.random(#texts)]
+text = text:sub(_w)
