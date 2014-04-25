@@ -27,6 +27,7 @@ local tFiles = {
     'README.md',
     'os/CraftOS/name.grub',
     'os/CraftOS/startup',
+    'lgrub.sys/splash.lua',
     'lgrub.sys/api/lgrub.lua',
     'lgrub.sys/api/Drawing.lua', -- Thanks oeed!
 --    'lgrub.sys/api/wrappedFS.lua',
