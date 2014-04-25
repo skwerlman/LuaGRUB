@@ -37,7 +37,7 @@ function listOSes() -- This is a public function because OSes might allow the in
 end
 
 function run(osName)
-  thisOS = osName
+  thisOS = osName:sub(1,-8)
   term.setCursorPos(1,1)
   term.setTextColor(colors.white)
   term.setBackgroundColor(colors.black)
