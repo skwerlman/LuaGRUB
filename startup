@@ -77,11 +77,15 @@ local function grub_selector()
   __GRUB_START_TIME = os.clock()
   grub_countdown('sleep')
   while continue do
+    local timerTip = '; any key cancels timer'
+    if __GRUB_TIME_LEFT == 'infinity' then
+      timerTip = ''
+    end
     Drawing.DrawArea(1, 1, Drawing.Screen.Width, 2, ' ', colors.lightGray, colors.lightGray) -- version + splash bg
     Drawing.DrawCharactersCenter(1, 1, nil, 1, 'LuaGRUB v'..lgrub.version, colors.black, colors.lightGray) -- write version to buffer
     Drawing.DrawCharactersCenter(1, 2, nil, 1, splash.text, colors.black, colors.lightGray) -- write splash to buffer
     Drawing.DrawArea(1, Drawing.Screen.Height, Drawing.Screen.Width, 1, ' ', colors.lightGray, colors.lightGray) -- time left bg
-    Drawing.DrawCharactersCenter(1, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide; any key cancels timer', colors.black, colors.lightGray) -- write time left to buffer
+    Drawing.DrawCharactersCenter(1, Drawing.Screen.Height, nil, 1, __GRUB_TIME_LEFT..' seconds left to decide'..timerTip, colors.black, colors.lightGray) -- write time left to buffer
     for nLine = 1, #tOS do
       local sLine = ' '
       local fgColor = colors.white
