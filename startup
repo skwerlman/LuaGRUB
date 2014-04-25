@@ -158,6 +158,7 @@ while __continue do
   end
 end
 if isDebug then
+  print("TextColor")
   printError("End Of OS Code")
   sleep(5)
 end
