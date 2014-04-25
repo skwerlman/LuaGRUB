@@ -1,6 +1,6 @@
 local isDebug = true
 
-shell.run('launcher', tostring(isDebug)) -- check for updates
+shell.run('launcher.lua', tostring(isDebug)) -- check for updates
 
 
 local oldfs = fs
