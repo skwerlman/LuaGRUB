@@ -1,8 +1,7 @@
 local isDebug = true
 
-if not isDebug then
-  shell.run('launcher') -- check for updates
-end
+shell.run('launcher', tostring(isDebug)) -- check for updates
+
 
 local oldfs = fs
 local __GRUB_START_TIME = nil -- Initialized just before the main loop/timer are run

@@ -1,3 +1,6 @@
+local tArgs = {...}
+local isDebug = (tArgs[1] == 'true')
+
 function output(n,n2,r,f,auto,u)
   term.setCursorPos(1,1)
   term.clear()
@@ -30,9 +33,12 @@ local tFiles = {
     'lgrub.sys/splash.lua',
     'lgrub.sys/api/lgrub.lua',
     'lgrub.sys/api/Drawing.lua', -- Thanks oeed!
---    'lgrub.sys/api/wrappedFS.lua',
+    'lgrub.sys/api/wrappedFS.lua',
   }
 local repo = 'https://raw.github.com/skwerlman/LGRUB-stable/master/'
+if isDebug then -- use debug repo instead
+  repo = 'https://raw.github.com/skwerlman/LuaGRUB/master/'
+end
 
 local root = shell.dir() or ''
 local updated = false
