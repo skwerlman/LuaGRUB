@@ -36,13 +36,13 @@ function listOSes() -- This is a public function because OSes might allow the in
   return tOut
 end
 
-function run(osName)
+function run(env, osName)
   thisOS = osName:sub(1,-8)
   term.setCursorPos(1,1)
   term.setTextColor(colors.white)
   term.setBackgroundColor(colors.black)
   term.clear()
-  shell.run(osName)
+  os.run(env, osName)
   term.clear()
 end
 
