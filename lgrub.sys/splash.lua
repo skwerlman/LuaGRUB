@@ -2,7 +2,7 @@
 
 -- Add more if you want!
 local texts = {
-   --MAXLEN-48-------------------------------------  
+   --MAXLEN-50---------------------------------------  
   "Lua means 'toilet' or 'bathroom' in Hawaiian!",
   "Teaching Lua all about itself!",
   "Lua means 'take' or 'assume' in Romainian!",
@@ -22,7 +22,7 @@ local texts = {
   "To quote Hamlet Act III Scene III Line 87, 'No'",
   "Kungani isikhathi sokubheka lokhu up?",
   "Manually added CraftOS",
-  "Stil doesn't support OneOS!",
+  "Still doesn't support OneOS!",
   "Splash Text!",
   "Why'd I add this when there's a bug over there?",
   "git commit -m 'AAAAAAAAAAAAAA'",
@@ -44,7 +44,7 @@ local texts = {
   "It's the difference between <p /> and <ln />!",
   "Also try EnderAPI",
   "x = width/2 - text.len()/2",
-  "Potatoes & milk have everything you need to live", -- max len
+  "Potatoes & milk have everything you need to live!",
   "1.0 breaks OneOS!",
   "/tp @a 0 -2 0",
   "Sledding with Tigers!",
