@@ -10,8 +10,8 @@ function output(n,n2,r,f,auto,u)
   print(u)
 end
 local t = shell.getRunningProgram()
-if t ~= 'launcher' then
-  fs.move(t,'launcher')
+if t ~= 'launcher.lua' then
+  fs.move(t,'launcher.lua')
   printError('Invalid file name. Correcting and rebooting.')
   sleep(2)
   os.reboot()
@@ -108,10 +108,10 @@ end
 
 --# Update the launcher, if need be
 
-output(#tFiles+1,#tFiles+1,repo,'launcher',shouldAutoUpdate,updated)
+output(#tFiles+1,#tFiles+1,repo,'launcher.lua',shouldAutoUpdate,updated)
 
 local sRunning = shell.getRunningProgram()
-local response = http.get( repo .. 'launcher' )
+local response = http.get( repo .. 'launcher.lua' )
 if response then
   local sResponse = response.readAll()
   response.close()
@@ -129,7 +129,7 @@ if response then
       updated = true
     end
   end
-  output(#tFiles+1,#tFiles+1,repo,'launcher',shouldAutoUpdate,updated)
+  output(#tFiles+1,#tFiles+1,repo,'launcher.lua',shouldAutoUpdate,updated)
 end
 
 if updated then
