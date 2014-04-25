@@ -55,4 +55,4 @@ local texts = {
 
 local _w = term.getSize()
 text = texts[math.random(#texts)]
-text = text:sub(_w)
+text = text:sub(1,_w)
