@@ -97,7 +97,7 @@ local function grub_selector()
       Drawing.WriteStringToBuffer(2, nLine + 2, sLine, fgColor, colors.black) -- write OS name to buffer
     end
     Drawing.DrawBuffer() -- paint buffer to screen
-    local sEvent, nKey = __tempPEStorage()
+    local sEvent, nKey = os.pullEvent()
     if sEvent == 'key' then
       grub_countdown('key')
       if nKey == 200 or nKey == 17 then
