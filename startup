@@ -31,9 +31,11 @@ local h, w = term.getSize()
 loadAPI(shell.dir()..'lgrub.sys/splash.lua') -- splash text
 loadAPI(shell.dir()..'lgrub.sys/api/lgrub.lua') -- an interface that allows OSes to list other OSes by name, and also what we use here.
 loadAPI(shell.dir()..'lgrub.sys/api/Drawing.lua') -- Oeed's drawing API
+
 if isDebug then
-  shell.run(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
-  fs = wrappedFS -- Replace the standard fs with wrappedFS
+  --shell.run(shell.dir()..'lgrub.sys/api/wrappedFS.lua') -- forces relative paths (hopefully)
+  --fs = wrappedFS -- Replace the standard fs with wrappedFS
+
 end
 lgrub.init(shell)
 Drawing.Clear()
@@ -43,7 +45,7 @@ Drawing.DrawCharactersCenter(1, 2, nil, 1, splash.text, colors.black, colors.lig
 Drawing.DrawBuffer() -- paint buffer to screen
 
 -- event spam; necessary to keep timer working
-function grub_evnt()
+local function grub_evnt()
   while true do
     if __GRUB_TIME_LEFT == 'infinity' then
       coroutine.yield()
@@ -133,6 +135,23 @@ end
 parallel.waitForAny(grub_selector, grub_evnt) -- Wait up to fifteen seconds for user input, or use the first OS in the list
 local __osPath = lgrub.getPrepped()
 
+local function launch(osName)
+  lgrub.setRunning(osName)
+  term.setCursorPos(1,1)
+  term.setTextColor(colors.white)
+  term.setBackgroundColor(colors.black)
+  local root = shell
+  shell.resolve = function(str)
+    if str=="." then 
+      return root.resolve(lgrub.getOS())
+    else
+      str=str:gmatch(".","")
+      return lgrub.getOS()..str
+    end
+  end
+  setfenv(root.run("osName"),_G)
+  term.clear()
+end
 -- exec OS
 local __continue = true
 while __continue do
