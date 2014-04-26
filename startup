@@ -168,7 +168,7 @@ while __continue do
   if __osPath == 'Shutdown' then -- force immediate power down
     os.shutdown()
   end
-  lgrub.run(getfenv(), __osPath..'/startup')
+  launch(__osPath..'/startup')
   if lgrub.goAgain() then
     __osPath = lgrub.getNewOS()
     __continue = true
