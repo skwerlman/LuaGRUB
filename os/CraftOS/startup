@@ -1,4 +1,4 @@
-if lgrub.enabled then
+if lgrub and lgrub.enabled then
   lgrub.bootNewOS('CraftOS') -- CraftOS handling is hard-coded
   return
 else

@@ -1,0 +1,131 @@
+{
+    "name": "LuaGRUB 1.0.1: Developer's Notes",
+    "tags": {
+        "CR": "if term.isColor() then term.setTextColor(colors.red) end",
+        "CB": "if term.isColor() then term.setTextColor(colors.blue) end",
+        "CY": "if term.isColor() then term.setTextColor(colors.yellow) end",
+        "TC": "local max,bg,fg,fgb,b,s,n,h,l,_x,_y,_x2,_y2,i max=0 if term.isColor() then bg=colors.black fg=colors.yellow fgb=colors.white term.setBackgroundColor(bg) term.setTextColor(fgb) end for _,v in pairs(doc.contents) do max=math.max(v:len()+2,max) end b=string.rep('-',max) s=string.rep(' ',max) n='\\n' h='+'..b..'+'..n l=h for _,_ in pairs(doc.contents) do l=l..'|'..s..'|'..n end l=l..b _x,_y=term.getCursorPos() print(l) _x2,_y2=term.getCursorPos if term.isColor() then term.setTextColor(fg) end i=0 for _,v in pairs(doc.contents) do i=i+1 setCursorPos(_x+1,_y+i) print(v) end if term.isColor() then term.setTextColor(fgb) term.setCursorPos(_x2,_y2) end -- generates the toc"
+    },
+    "colors": {
+        "FG": "if term.isColor() then term.setTextColor(colors.white) end",
+        "BG": "if term.isColor() then term.setBackgroundColor(colors.black) end"
+    },
+    "contents": {
+        "toc00": "Table of contents",
+        "toc01": "File Structure",
+        "toc02": "lgrub API",
+        "toc03": "wrappedFS API",
+        "toc04": "wrappedOS API",
+        "toc05": "wrappedSH API",
+        "toc06": "Drawing API",
+        "toc07": "splash API",
+        "toc08": "JSON API",
+        "toc09": "Credits"
+    },
+    "text": {
+        "titles": {
+            "toc00": "Table of contents",
+            "toc01": "LuaGRUB File Structure",
+            "toc02": "Using the lgrub API",
+            "toc03": "About the wrappedFS API",
+            "toc04": "About the wrappedOS API",
+            "toc05": "About the wrappedSH API",
+            "toc06": "About oeed's Drawing API",
+            "toc07": "On splash.lua",
+            "toc08": "The JSON API",
+            "toc09": "Credits"
+        },
+        "toc00": [
+            "@CYUnless you plan on writing an OS that can interact with the lgrub.lua API, you don't need to read this.",
+            "@TC"
+        ],
+        "toc01": [
+            "The file structure is relatively simple.",
+            "All the OSes go in individual subfolders within /os, while all bootloader's APIs and docs go into lgrub.sys.",
+            "Each OS must have a startup file inside its folder, and optionally a file called 'name.grub'.",
+            "name.grub is the file that stores the prettyprint name of the OS. For example, in the included '/os/CraftOS/' folder, name.grub has 'CraftOS' on the first line. There can be additional descriptive text on the following lines, but they are ignored in the current version."
+        ],
+        "toc02": [
+            "It contains several functions that can be used by an OS to find other OSes, reboot directly into itself without loading the bootloader, bot  directly into another OS the same way, as well as several other functions.",
+            "It is loaded into the global variable 'lgrub'.",
+            "",
+            "@CYbootNewOS(osPath)",
+            "This command sets an internal API variable so if you exit the OS (without rebooting the computer) the OS at the path given will start.",
+            "",
+            "@CYrebootOS()",
+            "This command sets an internal API variable so if you exit the OS (without rebooting the computer) the same OS will start again.",
+            "",
+            "@CYlistOSes()",
+            "Returns a table of 2-element tables containing both the pettyprint name (if there is one) of each OS and the path to each OS.",
+            "This can be used by an OS to find out about other OSes present on the machine",
+            "",
+            "@CYsetRunning(osName)",
+            "@CR[DANGEROUS!]",
+            "This forcibly changes the current sandbox path. It can be used to increse or decrese the scope of the sandbox when necessary, but unless you adjust all your paths accordingly, your OS will break very fast.",
+            "Use with extreme care.",
+            "",
+            "There are several other functions used by the bootloader that shouldn't be needed by an OS, so they aren't documented here. Feel free to look inside the API itself, of course."
+        ],
+        "toc03": [
+            "This is an API that is planned for the next release.",
+            "It will wrap the filesystem, and change how the io API responds, tricking OSes into thinking they are in the root folder.",
+            "This will mean that both absolute and relative paths will resolve to /os/osName/path rather than /path"
+        ],
+        "toc04": [
+            "This is an API that is planned for the next release.",
+            "It will wrap the filesystem, and change how the io API responds, tricking OSes into thinking they are in the root folder.",
+            "This will mean that both absolute and relative paths will resolve to /os/osName/path rather than /path"
+        ],
+        "toc05": [
+            "This is an API that is planned for the next release.",
+            "It will wrap the filesystem, and change how the io API responds, tricking OSes into thinking they are in the root folder.",
+            "This will mean that both absolute and relative paths will resolve to /os/osName/path rather than /path"
+        ],
+        "toc06": [
+            "This API was originally written by Oeed for his OneOS. The API used here is from OneOS version 1.0.0.",
+            "It's used by LuaGRUB to draw and render the bootloader.",
+            "Used with permission.",
+            "",
+            "Get OneOS here:",
+            "@CBhttp://www.computercraft.info/forums2/index.php?/topic/17286-oneos-version-11-the-all-in-one-operating-system/",
+            "Or here:",
+            "@CBhttps://github.com/oeed/OneOS"
+        ],
+        "toc07": [
+            "The splash API is used by LuaGRUB to get phrases from splash.JSON. It's mostly for fun.",
+            "The splash API exposes 4 functions at present, though only 3 are of interest.",
+            "",
+            "@CYgetText()",
+            "Generates the splash text to be used.",
+            "We generate without returning because we don't want the splash text to change each time we get it.",
+            "",
+            "@CYtext()",
+            "Returns the splash text obtained by getText, or 'None!' if it hasn't been run yet.",
+            "",
+            "@CYaddText(text)",
+            "Adds the string or array of strings to splash.JSON",
+            "Use this if you want to add additional splash texts to the bootloader.",
+            "",
+            "@CYprintAllSplashText()",
+            "Prints a serialized glob containing all the splash text in splash.JSON.",
+            "Added for debugging purposes; it doesn't play well with GUIs since it calls the native print()."
+        ],
+        "toc08": [
+            "This API was written by Craig Mason-Jones, and he released it under the MIT License (MIT).",
+            "It is loaded into the global variable 'JSON'.",
+            "LuaGRUB uses it for splash.lua, and will use it for the upcoming lman documentation tool.",
+            "All relevent documentation is in it's source at '/lgrub.sys/api/JSON.lua'"
+        ],
+        "toc09": [
+            "@CYLuaGRUB Copyright (C) 2014 Skwerlman",
+            "I'd like to say thanks to:",
+            "Oeed for letting me use his Drawing.lua from OneOS.",
+            "SuicidalSTDz for writing the launcher that mine is based on.",
+            "Andy73 (aka viluon) for tips on sandboxing the OSes.",
+            "theoriginalbit for his os.loadAPI replacer.",
+            "Craig Mason-Jones for his JSON API.",
+            "all the great OS authors out there for giving me a reason to write this.",
+            "everyone over on StackOverflow for being so helpful."
+        ]
+    }
+}

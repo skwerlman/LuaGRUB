@@ -1,29 +1,34 @@
-version = '1.0.1'
-enabled = true -- For OSes to see if we exist; will be true if lgrub is present, otherwise nil
 
-local thisOS = nil
-local shell, grubDir, tempOS, newOS
-local cont = false -- been having weird problems with public variables, had to wrap them in functions
+lgrub = {
+  ["version"] = '1.0.1',
+  ["enabled"] = true, -- For OSes to see if we're working; will be true if lgrub is present, otherwise nil; check as 'if lgrub and lgrub.enabled then'
+  ["thisOS"] = '',
+  ["grubDir"] = '',
+  ["tempOS"] = '',
+  ["newOS"] = '',
+  ["cont"] = false,
+  ["osDir"] = ''
+}
 
-function bootNewOS(osName)
-  newOS = osName
-  cont = true
+function lgrub.bootNewOS(osName)
+  lgrub.newOS = osName
+  lgrub.cont = true
 end
 
-function rebootOS()
-  cont = true
+function lgrub.rebootOS()
+  lgrub.cont = true
 end
 
-function listOSes() -- This is a public function because OSes might allow the installation of new OSes. After a new one is installed, they should run this.
-  local dirs = fs.list(osDir)
+function lgrub.listOSes() -- This is a public function because OSes might allow the installation of new OSes. After a new one is installed, they should run this.
+  local dirs = GRUBRoot.FS.list(lgrub.osDir)
   local tOut = {}
   local sData
   for i, dir in ipairs(dirs) do
     dir = osDir..'/'..dir
-    local items = fs.list(dir)
-    if fs.isDir(dir) then
-      if fs.exists(dir..'/name.grub') then -- they have declared their name
-        local file = fs.open(dir..'/name.grub', 'r')
+    local items = GRUBRoot.FS.list(dir)
+    if GRUBRoot.FS.isDir(dir) then
+      if GRUBRoot.FS.exists(dir..'/name.grub') then -- they have declared their name
+        local file = GRUBRoot.FS.open(dir..'/name.grub', 'r')
         sData = file.readLine() -- We get their actual name
         file.close()
         tOut[#tOut+1] = { sData, dir }
@@ -36,28 +41,11 @@ function listOSes() -- This is a public function because OSes might allow the in
   return tOut
 end
 
-function setRunning(env, osName)
-  thisOS = osName:sub(1,-8)
-end
-
-function getOS() -- lets OSes see their location
-  return thisOS
-end
-
-local function setShell( t )
-  shell = t
-  grubDir = shell.dir()
-  osDir = grubDir..'/os'
-end
-
-function init(shellRef)
-  setShell(shellRef or shell)
-  if not shell then
-    error('Must pass a shell reference at least once')
-  end
-end
-
 -- ignore everything below here; using them could break things
+
+function lgrub.setRunning(osName)
+  lgrub.thisOS = osName:sub(1,-8)
+end
 
 function prepForRun(path)
   tempOS = path
@@ -65,10 +53,6 @@ end
 
 function getPrepped()
   return tempOS
-end
-
-function done()
-  cont = false
 end
 
 function goAgain()
