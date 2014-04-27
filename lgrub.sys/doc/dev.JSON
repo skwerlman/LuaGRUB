@@ -82,7 +82,7 @@
             "This will mean that both absolute and relative paths will resolve to /os/osName/path rather than /path"
         ],
         "toc06": [
-            "This API was originally written by Oeed for his OneOS. The API used here is from OneOS version 1.0.0.",
+            "This API was originally written by Oeed for his OneOS. The API used here is from OneOS version 1.1.1.",
             "It's used by LuaGRUB to draw and render the bootloader.",
             "Used with permission.",
             "",
