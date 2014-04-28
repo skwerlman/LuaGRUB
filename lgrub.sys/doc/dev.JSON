@@ -5,7 +5,7 @@
         "CR": "if term.isColor() then term.setTextColor(colors.red) end",
         "CB": "if term.isColor() then term.setTextColor(colors.blue) end",
         "CY": "if term.isColor() then term.setTextColor(colors.yellow) end",
-        "TC": "local max,bg,fg,fgb,b,s,n,h,l,_x,_y,_x2,_y2,i max=0 if term.isColor() then bg=colors.black fg=colors.yellow fgb=colors.white term.setBackgroundColor(bg) term.setTextColor(fgb) end for _,v in pairs(doc.contents) do max=math.max(v:len()+2,max) end b=string.rep('-',max) s=string.rep(' ',max) n='\\n' h='+'..b..'+'..n l=h for _,_ in pairs(doc.contents) do l=l..'|'..s..'|'..n end l=l..b _x,_y=term.getCursorPos() print(l) _x2,_y2=term.getCursorPos if term.isColor() then term.setTextColor(fg) end i=0 for _,v in pairs(doc.contents) do i=i+1 setCursorPos(_x+1,_y+i) print(v) end if term.isColor() then term.setTextColor(fgb) term.setCursorPos(_x2,_y2) end -- generates the toc"
+        "TC": "local max,bg,fg,fgb,b,s,n,h,l,_x,_y,_x2,_y2,i max=0 if term.isColor() then bg=colors.black fg=colors.yellow fgb=colors.white term.setBackgroundColor(bg) term.setTextColor(fgb) end for _,v in pairs(doc.contents) do max=math.max(v:len()+2,max) end b=string.rep('-',max) s=string.rep(' ',max) n='\\n' h='+'..b..'+'..n l=h for _,_ in pairs(doc.contents) do l=l..'|'..s..'|'..n end l=l..b _x,_y=term.getCursorPos() print(l) _x2,_y2=term.getCursorPos if term.isColor() then term.setTextColor(fg) end i=0 for _,v in pairs(doc.contents) do i=i+1 setCursorPos(_x+1,_y+i) print(v) end if term.isColor() then term.setTextColor(fgb) end term.setCursorPos(_x2,_y2) -- generates the toc"
     },
     "colors": {
         "FG": "if term.isColor() then term.setTextColor(colors.white) end",
