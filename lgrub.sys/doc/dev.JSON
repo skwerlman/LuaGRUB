@@ -1,5 +1,6 @@
 {
     "name": "LuaGRUB 1.0.1: Developer's Notes",
+    "update": "http://raw.githubusercontent.com/skwerlman/LuaGRUB/master/lgrub.sys/doc/dev.JSON",
     "tags": {
         "CR": "if term.isColor() then term.setTextColor(colors.red) end",
         "CB": "if term.isColor() then term.setTextColor(colors.blue) end",
