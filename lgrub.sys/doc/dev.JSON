@@ -5,7 +5,6 @@
         "CR": "if term.isColor() then term.setTextColor(colors.red) end",
         "CB": "if term.isColor() then term.setTextColor(colors.blue) end",
         "CY": "if term.isColor() then term.setTextColor(colors.yellow) end",
-        "TC": "local max,bg,fg,fgb,b,s,n,h,l,_x,_y,_x2,_y2,i max=0 if term.isColor() then bg=colors.black fg=colors.yellow fgb=colors.white term.setBackgroundColor(bg) term.setTextColor(fgb) end for _,v in pairs(this.contents) do max=math.max(v:len()+2,max) end b=string.rep('-',max) s=string.rep(' ',max) n='\\n' h='+'..b..'+'..n l=h for _,_ in pairs(this.contents) do l=l..'|'..s..'|'..n end l=l..h _x,_y=term.getCursorPos() print(l) _x2,_y2=term.getCursorPos() if term.isColor() then term.setTextColor(fg) end i=0 for _,v in pairs(this.contents) do i=i+1 setCursorPos(_x+1,_y+i) print(v) end if term.isColor() then term.setTextColor(fgb) end term.setCursorPos(_x2,_y2) -- generates the toc"
     },
     "colors": {
         "FG": "if term.isColor() then term.setTextColor(colors.white) end",
@@ -26,7 +25,6 @@
     },
     "text": {
         "titles": {
-            "toc00": "Table of contents",
             "toc01": "LuaGRUB File Structure",
             "toc02": "Using the lgrub API",
             "toc03": "About the wrappedFS API",
@@ -37,9 +35,8 @@
             "toc08": "The JSON API",
             "toc09": "Credits"
         },
-        "toc00": [
-            "@CYUnless you plan on writing an OS that can interact with the lgrub.lua API, you don't need to read this.",
-            "@TC"
+        "toc": [
+            "@CYUnless you plan on writing an OS that can interact with the lgrub.lua API, you don't need to read this."
         ],
         "toc01": [
             "The file structure is relatively simple.",
